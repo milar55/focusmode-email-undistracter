@@ -7,7 +7,7 @@ env:
 
 on:
   schedule:
-    - cron: "*/15 9-16 * * 1-5"   # every 15 min Mon‑Fri 09‑16 UTC
+    - cron: "*/15 14-22 * * 1-6"   # every 15 min 7am-5pm PST Mon-Sat (2pm-10pm UTC)
   workflow_dispatch:
 
 jobs:

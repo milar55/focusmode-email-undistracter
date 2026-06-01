@@ -46,6 +46,7 @@ jobs:
         with:
           title: "⚠️ Focus Mode Sweep Failed"
           content-filepath: .github/templates/sweep-failure.md
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run sweep
         continue-on-error: true

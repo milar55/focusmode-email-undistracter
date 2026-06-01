@@ -1,44 +1,44 @@
 # Focus Mode Email Undistracter
 
-A lightweight tool that automatically sweeps low‑priority newsletters and forum emails out of your Gmail inbox and labels them `Focus‑Muted`. It only targets **recent** messages (the last 2 hours) so you stay focused on what matters while still seeing weekend emails on Monday.
+A lightweight tool that automatically sweeps low‑priority newsletters and forum emails out of your Gmail inbox and labels them `Focus‑Muted`. By default it only targets **recent** messages (the last 2 hours) so you stay focused while still seeing weekend emails on Monday.
 
 ## Features
-- Runs every 15 minutes (via your own scheduler) and moves matching emails to a Gmail label.
+- Runs on demand (or via a scheduler) and moves matching emails to a Gmail label.
 - Never deletes emails; they are only labeled.
 - Configurable time‑window (`newer_than:2h` by default).
-- Works with a proxy (`PROXY_BASE_URL` / `PROXY_TOKEN`).
+- **Works without a proxy** – uses the official Google API client. A proxy can still be used if you set `PROXY_BASE_URL` and `PROXY_TOKEN`.
 
 ## Prerequisites
-1. **Google API credentials** – place `credentials.json` (OAuth client) and `token.json` (OAuth token) in the project root.
-2. **Environment variables** – set the following in your shell or a `.env` file:
-   ```
-   PROXY_BASE_URL=https://your-proxy.example.com
-   PROXY_TOKEN=your_proxy_token
-   ```
-3. **Python dependencies** – install with:
-   ```bash
-   uv pip install -r requirements.txt   # or pip install -r requirements.txt
-   ```
-   (The repository includes a minimal `requirements.txt`.)
+1. **Google OAuth credentials** – place `credentials.json` (OAuth client ID) in the project root. The first run will create `token.json` automatically.
+2. **Python dependencies** – install them:
+```bash
+uv pip install -r requirements.txt   # or pip install -r requirements.txt
+```
+3. (Optional) **Proxy configuration** – if you want to route calls through the Antigravity proxy, set these env vars:
+```powershell
+$env:PROXY_BASE_URL = "https://your-proxy.example.com"
+$env:PROXY_TOKEN    = "your_proxy_token"
+```
+   The script will use the proxy when these variables are present; otherwise it talks directly to Gmail.
 
 ## Usage
-Run the sweep sub‑command to label recent newsletters:
+### Sweep recent newsletters
 ```bash
-uv run focus_mode.py sweep   # or focus_mode_local.py sweep
+uv run focus_mode_local.py sweep   # or: uv run focus_mode.py sweep
 ```
-The script prints how many threads were processed and how many messages were labeled.
+The script prints how many messages were labeled. Runs against the last 2 hours by default.
 
-You can also send a midday reminder to yourself with:
+### Send a midday reminder
 ```bash
-uv run focus_mode.py nudge
+uv run focus_mode_local.py nudge   # or: uv run focus_mode.py nudge
 ```
 
 ## Customisation
-- Adjust the time window by editing `SWEEP_QUERY` in `focus_mode.py` / `focus_mode_local.py`. Example for a 4‑hour window:
-  ```python
-  SWEEP_QUERY = "in:inbox newer_than:4h (category:forums OR list:*)"
-  ```
-- Change the target label by modifying `LABEL_NAME`.
+- **Time window** – edit `SWEEP_QUERY` in `focus_mode.py` or `focus_mode_local.py`. Example for a 4‑hour window:
+```python
+SWEEP_QUERY = "in:inbox newer_than:4h (category:forums OR list:*)"
+```
+- **Label name** – change `LABEL_NAME`.
 
 ## License
 MIT – feel free to fork and adapt.

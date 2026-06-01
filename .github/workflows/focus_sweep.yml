@@ -40,5 +40,15 @@ jobs:
         run: |
           echo "$TOKEN_JSON" > token.json
 
+      - name: Create issue on failure
+        if: failure()
+        uses: peter-evans/create-issue@v5
+        with:
+          title: "⚠️ Focus Mode Sweep Failed"
+          body: |
+            The scheduled sweep job failed on ${{ github.run_id }}.
+            Please check the logs for details.
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Run sweep
         run: uv run focus_mode_local.py sweep

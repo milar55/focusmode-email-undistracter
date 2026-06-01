@@ -1,14 +1,17 @@
 # .github/workflows/focus_sweep.yml
 name: Focus Mode Sweep
 
+# Use Node.js 24 for JavaScript actions
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   schedule:
-    - cron: "*/15 9-16 * * 1-5"   # every 15 min, Mon‑Fri, 09‑16 UTC (sweep)
-    - cron: "0 14 * * 1-5"        # 14:00 UTC Mon‑Fri (nudge)
+    - cron: "*/15 9-16 * * 1-5"   # every 15 min Mon‑Fri 09‑16 UTC
   workflow_dispatch:
 
 jobs:
-  run:
+  sweep:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -37,18 +40,5 @@ jobs:
         run: |
           echo "$TOKEN_JSON" > token.json
 
-      - name: Run sweep and optional nudge
-        run: |
-          echo "Running sweep"
-          uv run focus_mode_local.py sweep > sweep.log 2>&1
-          cat sweep.log
-
-          # Run nudge only at 14:00 UTC (minute 00)
-          HOUR=$(date -u +%H)
-          MIN=$(date -u +%M)
-          if [[ "$HOUR" == "14" && "$MIN" == "00" ]]; then
-            echo "Running nudge"
-            uv run focus_mode_local.py nudge
-          else
-            echo "Nudge not scheduled at this time"
-          fi
+      - name: Run sweep
+        run: uv run focus_mode_local.py sweep

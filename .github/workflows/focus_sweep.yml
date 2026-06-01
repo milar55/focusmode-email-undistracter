@@ -1,0 +1,53 @@
+# .github/workflows/focus_sweep.yml
+name: Focus Mode Sweep & Nudge
+
+on:
+  schedule:
+    # Sweep every weekday (Mon‑Fri) every 15 minutes between 9 am‑4 pm (UTC)
+    - cron: "*/15 9-16 * * 1-5"
+    # Nudge at 2 pm on weekdays
+    - cron: "0 14 * * 1-5"
+  workflow_dispatch:  # manual trigger
+
+jobs:
+  sweep_or_nudge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv (fast installer)
+        run: curl -LsSf https://github.com/astral-sh/uv/releases/latest/download/uv-installer.sh | sh
+
+      - name: Install dependencies
+        run: uv pip install -r requirements.txt
+
+      - name: Write OAuth credentials (secret) to file
+        env:
+          CRED_JSON: ${{ secrets.CREDENTIALS_JSON }}
+        run: |
+          echo "$CRED_JSON" > credentials.json
+
+      - name: Write token.json (secret) to file
+        env:
+          TOKEN_JSON: ${{ secrets.TOKEN_JSON }}
+        run: |
+          echo "$TOKEN_JSON" > token.json
+
+      - name: Run sweep or nudge based on schedule
+        run: |
+          # GitHub provides the schedule string in the env variable GITHUB_EVENT_SCHEDULE
+          # We'll infer the command from the cron pattern.
+          if [[ "${{ github.event.schedule }}" == "*/15 9-16 * * 1-5" ]]; then
+            uv run focus_mode_local.py sweep
+          elif [[ "${{ github.event.schedule }}" == "0 14 * * 1-5" ]]; then
+            uv run focus_mode_local.py nudge
+          else
+            echo "Unexpected schedule trigger"
+            exit 1
+          fi

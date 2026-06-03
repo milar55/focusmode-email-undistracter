@@ -13,6 +13,10 @@ on:
       timezone: "America/Los_Angeles"
   workflow_dispatch:
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   sweep:
     runs-on: ubuntu-latest

@@ -6,8 +6,8 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 on:
-  schedule:
-    - cron: "7/15 7-16 * * 1-5"
+schedule:
+    - cron: "*/15 7-16 * * 1-5"
       timezone: "America/Los_Angeles"
     - cron: "0 17 * * 1-5"
       timezone: "America/Los_Angeles"
@@ -43,6 +43,11 @@ jobs:
         run: |
           echo "$TOKEN_JSON" > token.json
 
+      - name: Run sweep
+        continue-on-error: true
+        run: uv run focus_mode_local.py sweep
+
+  
       - name: Create Issue From File
         if: failure()
         uses: peter-evans/create-issue-from-file@v6.0.0
@@ -50,7 +55,3 @@ jobs:
           title: "⚠️ Focus Mode Sweep Failed"
           content-filepath: .github/templates/sweep-failure.md
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Run sweep
-        continue-on-error: true
-        run: uv run focus_mode_local.py sweep

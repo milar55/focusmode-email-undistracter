@@ -10,6 +10,7 @@ Two subcommands:
            List-Unsubscribe newsletters) out of the inbox and into the
            `Focus-Muted` label. Label-only; emails are NEVER deleted.
   nudge  - Send a midday check-in email to self.
+  reverse - Restore all messages with `Focus-Muted` label back to the Inbox.
 """
 import base64
 import os
@@ -94,8 +95,38 @@ def nudge():
     print("Nudge sent.")
 
 
+def reverse():
+    label_id = get_or_create_label()
+    ids = []
+    page_token = None
+    while True:
+        params = {"labelIds": [label_id], "maxResults": 100}
+        if page_token:
+            params["pageToken"] = page_token
+        r = requests.get(f"{BASE}/messages", headers=HEADERS, params=params, timeout=30)
+        r.raise_for_status()
+        data = r.json()
+        ids.extend(m["id"] for m in data.get("messages", []))
+        page_token = data.get("nextPageToken")
+        if not page_token:
+            break
+    if not ids:
+        print("Nothing to reverse.")
+        return
+    for i in range(0, len(ids), 1000):
+        chunk = ids[i : i + 1000]
+        r = requests.post(
+            f"{BASE}/messages/batchModify",
+            headers=HEADERS,
+            json={"ids": chunk, "removeLabelIds": [label_id], "addLabelIds": ["INBOX"]},
+            timeout=60,
+        )
+        r.raise_for_status()
+    print(f"Reversed {len(ids)} message(s) from '{LABEL_NAME}' back to inbox.")
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
-    {"sweep": sweep, "nudge": nudge}.get(
-        cmd, lambda: sys.exit(f"Unknown command: {cmd!r}. Use sweep|nudge.")
+    {"sweep": sweep, "nudge": nudge, "reverse": reverse}.get(
+        cmd, lambda: sys.exit(f"Unknown command: {cmd!r}. Use sweep|nudge|reverse.")
     )()

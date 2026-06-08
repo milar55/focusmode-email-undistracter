@@ -12,6 +12,16 @@ on:
     - cron: "0 17 * * 1-5"
       timezone: "America/Los_Angeles"
   workflow_dispatch:
+    inputs:
+      command:
+        description: "Command to run (sweep, reverse, nudge)"
+        required: true
+        default: "sweep"
+        type: choice
+        options:
+          - sweep
+          - reverse
+          - nudge
 
 permissions:
   contents: read
@@ -47,9 +57,18 @@ jobs:
         run: |
           echo "$TOKEN_JSON" > token.json
 
-      - name: Run sweep
-        run: uv run focus_mode_local.py sweep
-        
+      - name: Run focus command
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            CMD="${{ github.event.inputs.command }}"
+          elif [ "${{ github.event.schedule }}" = "0 17 * * 1-5" ]; then
+            CMD="reverse"
+          else
+            CMD="sweep"
+          fi
+          echo "Executing: uv run focus_mode_local.py $CMD"
+          uv run focus_mode_local.py "$CMD"
+          
       - name: Create Issue From File
         if: failure()
         uses: peter-evans/create-issue-from-file@v6.0.0

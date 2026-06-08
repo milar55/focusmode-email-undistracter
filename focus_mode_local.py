@@ -18,6 +18,7 @@ Two subcommands:
            List-Unsubscribe newsletters) out of the inbox and into the
            `Focus-Muted` label. Label-only; emails are NEVER deleted.
   nudge  - Send a midday check-in email to self.
+  reverse - Restore all messages with `Focus-Muted` label back to the Inbox.
 """
 import base64
 import os
@@ -145,13 +146,54 @@ def nudge(service):
         sys.exit(1)
 
 
+def reverse(service):
+    label_id = get_or_create_label(service)
+    messages = []
+    page_token = None
+    try:
+        while True:
+            results = service.users().messages().list(
+                userId="me", labelIds=[label_id], pageToken=page_token, maxResults=100
+            ).execute()
+            messages.extend(results.get("messages", []))
+            page_token = results.get("nextPageToken")
+            if not page_token:
+                break
+    except HttpError as error:
+        print(f"API Error in listing messages: {error}", file=sys.stderr)
+        sys.exit(1)
+
+    if not messages:
+        print("Nothing to reverse.")
+        return
+
+    ids = [m["id"] for m in messages]
+    # batchModify accepts up to 1000 ids per call
+    for i in range(0, len(ids), 1000):
+        chunk = ids[i : i + 1000]
+        body = {
+            "ids": chunk,
+            "removeLabelIds": [label_id],
+            "addLabelIds": ["INBOX"],
+        }
+        try:
+            service.users().messages().batchModify(userId="me", body=body).execute()
+        except HttpError as error:
+            print(f"API Error in batchModify: {error}", file=sys.stderr)
+            sys.exit(1)
+            
+    print(f"Reversed {len(ids)} message(s) from '{LABEL_NAME}' back to inbox.")
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
-    if cmd not in ("sweep", "nudge"):
-        sys.exit(f"Unknown command: {cmd!r}. Use sweep|nudge.")
+    if cmd not in ("sweep", "nudge", "reverse"):
+        sys.exit(f"Unknown command: {cmd!r}. Use sweep|nudge|reverse.")
         
     service = get_gmail_service()
     if cmd == "sweep":
         sweep(service)
     elif cmd == "nudge":
         nudge(service)
+    elif cmd == "reverse":
+        reverse(service)

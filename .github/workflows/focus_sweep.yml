@@ -7,7 +7,7 @@ env:
 
 on:
   schedule:
-    - cron: "*/15 7-16 * * 1-5"
+    - cron: "*/15 6-16 * * 1-5"
       timezone: "America/Los_Angeles"
     - cron: "0 17 * * 1-5"
       timezone: "America/Los_Angeles"

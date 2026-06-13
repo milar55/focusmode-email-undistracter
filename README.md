@@ -1,20 +1,13 @@
 # Focus Mode Email Undistracter
 
-<<<<<<< HEAD
 A lightweight tool that automatically sweeps low‑priority newsletters and forum emails out of your Gmail inbox and labels them `Focus‑Muted`. By default it only targets recent messages (last 2 hours) so you stay focused while still seeing weekend emails on Monday.
-=======
-Undistract yourself from click-baity email newsletters you love to sign up for but never actually read. This tool automatically sweep low‑priority newsletters out of your Gmail inbox and makes them invisible for the day. It identifies newsletters based on email pattern (amd if they're in Forums), targets **recent** messages coming into your inbox (the last 2 hours) and and labels them `Focus‑Muted`. At the end of the day (5pm) all the news letters go back where they came in, ready for your doom scrolling pleasure. You stay focused and productive when it matters. 
->>>>>>> c23fa075df4abd1e4d09ac314c0c1b5b8527ef23
 
 ## Features
 - Runs on demand or via a scheduler and moves matching emails to a Gmail label.
 - Never deletes emails; they are only labeled.
 - Configurable time‑window (`newer_than:2h` by default).
-<<<<<<< HEAD
 - Works without a proxy – uses the official Google API client. A proxy can still be used if you set `PROXY_BASE_URL` and `PROXY_TOKEN`.
-=======
 - Runs on Github actions too
->>>>>>> c23fa075df4abd1e4d09ac314c0c1b5b8527ef23
 
 ## Prerequisites
 1. **Google OAuth credentials** – place `credentials.json` (OAuth client ID) in the project root. The first run will create `token.json` automatically.

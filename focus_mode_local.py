@@ -36,7 +36,7 @@ SCOPES = ["https://www.googleapis.com/auth/gmail.modify"]
 
 USER_EMAIL = "rudmilarahman@gmail.com"
 LABEL_NAME = "Focus-Muted"
-SWEEP_QUERY = "in:inbox newer_than:2h (category:forums OR list:*)"
+SWEEP_QUERY = "in:inbox newer_than:24h (category:forums OR list:*)"
 
 
 def get_gmail_service():
